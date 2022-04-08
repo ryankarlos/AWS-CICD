@@ -54,17 +54,3 @@ def handler(event, context):
                              'lang': tweet.user.lang
                              }
                 return response
-
-
-if __name__ == "__main__":
-    import configparser
-    config = configparser.ConfigParser()
-    config.read("/Users/rk1103/Documents/secrets/twitter_conf.ini")
-    consumer_key = config['DEFAULT']['APIKey']
-    consumer_secret = config['DEFAULT']['APIKeySecret']
-    access_token = config['DEFAULT']['AccessToken']
-    access_secret = config['DEFAULT']['AccessTokenSecret']
-    event = {'keyword': 'machine learning', 'delivery': 'stream'}
-    context = {}
-
-    handler(event, context)
