@@ -1,6 +1,22 @@
 def handler(event, context):
     import tweepy
     import json
+    import boto3
+
+    # Create a Secrets Manager client
+    session = boto3.session.Session()
+    client = session.client(
+        service_name='secretsmanager',
+        region_name=event['region_name']
+    )
+
+    get_secret_value_response = client.get_secret_value(SecretId=event['secret_name'])
+    secret = get_secret_value_response['SecretString']
+    secret = json.loads(secret)
+    consumer_key = secret['APIKey']
+    consumer_secret = secret['APIKeySecret']
+    access_token = secret['AccessToken']
+    access_secret = secret['AccessTokenSecret']
 
     class MyStreamListener(tweepy.Stream):
 
@@ -53,4 +69,4 @@ def handler(event, context):
                              'location': tweet.user.location,
                              'lang': tweet.user.lang
                              }
-                return response
+                print(response)
