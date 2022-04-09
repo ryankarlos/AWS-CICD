@@ -1,27 +1,23 @@
-def handler(event, context):
-    import tweepy
-    import json
-    import boto3
+import tweepy
+import time
+import json
 
-    # Create a Secrets Manager client
-    session = boto3.session.Session()
-    client = session.client(
-        service_name='secretsmanager',
-        region_name=event['region_name']
-    )
 
-    get_secret_value_response = client.get_secret_value(SecretId=event['secret_name'])
-    secret = get_secret_value_response['SecretString']
-    secret = json.loads(secret)
-    consumer_key = secret['APIKey']
-    consumer_secret = secret['APIKeySecret']
-    access_token = secret['AccessToken']
-    access_secret = secret['AccessTokenSecret']
+class MyStreamListener(tweepy.StreamingClient):
 
-    class MyStreamListener(tweepy.Stream):
+    def __init__(self, event, bearer_token):
+        self.start_time = time.time()
+        self.time_limit = event['duration']
+        super().__init__(bearer_token)
 
-        def on_data(self, data):
-            tweet = json.loads(data)
+    def on_data(self, data):
+
+        tweet = json.loads(data)
+        if time.time() - self.start_time > self.time_limit:
+            print(f"{self.time_limit} seconds time limit for streaming reached")
+            print("Success !")
+            self.disconnect()
+        else:
             if tweet:
                 try:
                     if not tweet['text'].startswith('RT'):
@@ -37,21 +33,35 @@ def handler(event, context):
                                     'lang': tweet['user']['lang']
                                     }
                         print(f"{response} \n")
-                except KeyError: # getting empty json in between stream so ignore these
+                except KeyError:
+                    # getting empty json in between stream so ignore these
                     pass
 
-    if event['delivery'] == "stream":
-        stream = MyStreamListener(consumer_key, consumer_secret, access_token, access_secret)
-        stream.filter(track=event.get('keyword'))
-    elif event['delivery'] == 'search':
+    def on_closed(self, response):
+        """
+        override this method to print rather than log error
+        """
+        print("Stream connection closed ")
 
-        auth = tweepy.OAuth1UserHandler(
-            consumer_key, consumer_secret, access_token, access_secret
-        )
 
-        api = tweepy.API(auth,  wait_on_rate_limit=True)
-        for tweet in tweepy.Cursor(api.search_tweets, event.get('keyword'), count=100).items():
+def tweepy_search_api(event, consumer_key, consumer_secret, access_token, access_secret):
+
+    auth = tweepy.OAuth1UserHandler(
+        consumer_key, consumer_secret, access_token, access_secret
+    )
+    start_time = time.time()
+    time_limit = event['duration']
+    api = tweepy.API(auth,  wait_on_rate_limit=True)
+    counter = 0
+    for tweet in tweepy.Cursor(api.search_tweets, event.get('keyword'), count=100).items():
+        if time.time() - start_time > time_limit:
+            api.session.close()
+            print(f"\n {time_limit} seconds time limit reached, so disconneting stream")
+            print(f" {counter} tweets streamed ! \n")
+            return
+        else:
             if not tweet.text.startswith('RT'):
+                counter += 1
                 response = {'created_at': tweet.created_at,
                             'handle': tweet.user.screen_name,
                              'text': tweet.text,
@@ -63,4 +73,5 @@ def handler(event, context):
                              'location': tweet.user.location,
                              'lang': tweet.user.lang
                              }
-                print(response)
+                print(f"{response}")
+
