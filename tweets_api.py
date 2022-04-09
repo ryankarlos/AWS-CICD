@@ -3,12 +3,12 @@ import time
 import json
 
 
-class MyStreamListener(tweepy.StreamingClient):
+class MyStreamListener(tweepy.Stream):
 
-    def __init__(self, event, bearer_token):
+    def __init__(self, event, consumer_key, consumer_secret, access_token, access_token_secret):
         self.start_time = time.time()
         self.time_limit = event['duration']
-        super().__init__(bearer_token)
+        super().__init__(consumer_key, consumer_secret, access_token, access_token_secret)
 
     def on_data(self, data):
 
@@ -21,7 +21,7 @@ class MyStreamListener(tweepy.StreamingClient):
             if tweet:
                 try:
                     if not tweet['text'].startswith('RT'):
-                        response = {'created_at': tweet['user']['created_at'],
+                        response = {'created_at': tweet['created_at'],
                                     'handle': tweet['user']['screen_name'],
                                     'text': tweet['text'],
                                     'favourite_count': tweet['user']['favourites_count'],

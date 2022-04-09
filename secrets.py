@@ -28,11 +28,11 @@ def get_secrets(mode="aws", path='/Users/rk1103/Documents/secrets/twitter_conf.i
         config = configparser.ConfigParser(interpolation=None)
         config.read(path)
         secret = {
-                'APIKey': config['DEFAULT']['APIKey'],
-                'APIKeySecret':config['DEFAULT']['APIKeySecret'],
-                'AccessToken': config['DEFAULT']['AccessToken'],
-                'AccessTokenSecret': config['DEFAULT']['AccessTokenSecret'],
-                'BearerToken': config['DEFAULT']['BearerToken']
+                'consumer_key': config['DEFAULT']['APIKey'],
+                'consumer_secret':config['DEFAULT']['APIKeySecret'],
+                'access_token': config['DEFAULT']['AccessToken'],
+                'access_token_secret': config['DEFAULT']['AccessTokenSecret'],
+                'bearer_token': config['DEFAULT']['BearerToken']
                 }
         print(f'\n Successfully retrieved {mode} secrets from {path}')
     else:
