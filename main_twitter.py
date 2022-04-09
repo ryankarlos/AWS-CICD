@@ -3,7 +3,6 @@ def handler(event, context):
     from tweets_api import tweepy_search_api, MyStreamListener
     from secrets import get_secrets
     import itertools
-    from tweepy import StreamRule
 
     # Create a Secrets Manager client
     response = get_secrets(mode='local')
