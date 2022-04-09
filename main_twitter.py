@@ -4,7 +4,6 @@ def handler(event, context):
     from secrets import get_secrets
     import itertools
 
-    # Create a Secrets Manager client
     response = get_secrets(mode='local')
     api_keys = list(itertools.islice(response.values(), 4))
 
@@ -20,31 +19,3 @@ def handler(event, context):
     else:
         raise ValueError(f"'Delivery value in event payload must be either 'search' or 'realtime '.... "
                          f"you passed {event['delivery']}.")
-#
-#
-# if __name__ == "__main__":
-#
-#     import line_profiler
-#     import atexit
-#
-#     profile = line_profiler.LineProfiler()
-#     # prints this just before exiting script
-#     atexit.register(profile.print_stats)
-#
-#     @profile
-#     def profiled_function():
-#         from secrets import get_secrets
-#         from tweets_api import MyStreamListener
-#         from tweets_api import tweepy_search_api
-#
-#     profiled_function()
-#       # for realtime - may need to use a trending topic otherwise will have to wait a while to get anything
-#     event = {
-#       "keyword": "machine learning",
-#       "delivery": "search",
-#       'duration': 15
-#     }
-#     context = {}
-#     handler(event, context)
-#
-#
