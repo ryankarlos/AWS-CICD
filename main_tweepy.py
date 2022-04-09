@@ -40,12 +40,6 @@ def handler(event, context):
                 except KeyError: # getting empty json in between stream so ignore these
                     pass
 
-        def on_status(self, status):
-            print(status.id)
-
-        def on_connection_error(self):
-            self.disconnect()
-
     if event['delivery'] == "stream":
         stream = MyStreamListener(consumer_key, consumer_secret, access_token, access_secret)
         stream.filter(track=event.get('keyword'))
