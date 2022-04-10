@@ -4,7 +4,7 @@ def handler(event, context):
     from secrets import get_secrets
     import itertools
 
-    response = get_secrets(mode='local')
+    response = get_secrets(mode='aws')
     api_keys = list(itertools.islice(response.values(), 4))
 
     if event['delivery'] == "realtime":
