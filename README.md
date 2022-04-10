@@ -72,6 +72,9 @@ Line #      Hits         Time  Per Hit   % Time  Line Contents
 
 #### Triggering code pipeline and building docker image
 
+<img width="1000" alt="screnshots/codepipeline_executionhistory" src="https://github.com/ryankarlos/codepipeline/blob/master/screenshots/codepipeline_stages.png">
+
+
 Code Pipeline has been configured to trigger with every push to github/code commit repo. This will
 start the build phase, which runs the commands in buildspec.yml in different phases of build process
 https://docs.aws.amazon.com/codebuild/latest/userguide/getting-started-cli-create-build-spec.html
@@ -79,8 +82,8 @@ https://docs.aws.amazon.com/codebuild/latest/userguide/getting-started-cli-creat
 Environment variables are defined and new roles defined when creating code build stage.
 https://docs.aws.amazon.com/codebuild/latest/userguide/sample-docker.html
 
-![alt text](screnshots/codepipeline_executionhistory.png)
-![alt text](screnshots/codepipeline_stages.png)
+<img width="1000" alt="screnshots/codepipeline_executionhistory" src="https://github.com/ryankarlos/codepipeline/blob/master/screenshots/codepipeline_executionhistory.png">
+
 
 #### Setting up and in invoking lambda function to execute code in container
 
@@ -118,8 +121,8 @@ $ aws lambda invoke --function-name <lambda-arn> --payload '{ "keyword": "machin
     "ExecutedVersion": "$LATEST"
 }
 ```
+<img width="1000" alt="cloudwatch_lambda_executions" src="https://github.com/ryankarlos/codepipeline/blob/master/screenshots/cloudwatch_lambda_executions.png">
 
-![alt text](screnshots/cloudwatch_lambda_executions.png)
 
 Note that, ive set the --cli-binary-format parameter to raw-in-base64-out. Otherwise, i got the following error below.
 On google searching, i found this useful blog diagnosing the error https://bobbyhadz.com/blog/aws-cli-invalid-base64-lambda-error
