@@ -1,4 +1,4 @@
-# codepipeline
+# AWS Codepipeline Demo
 Demo of using code pipeline to build docker container and running with lambda function invocation  
 This application is using tweepy for streaming tweets 
 
