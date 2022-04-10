@@ -1,1 +1,1 @@
-{"errorMessage": "'region_name'", "errorType": "KeyError", "requestId": "107cbf1a-5930-483e-bfd0-cb2d86e9e0b0", "stackTrace": ["  File \"/var/task/main_tweepy.py\", line 10, in handler\n    region_name=event['region_name']\n"]}
+null
