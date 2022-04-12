@@ -17,7 +17,9 @@ def profiled_function():
 @click.option('--duration', default=15, type=click.INT, help="How long (secs) to let stream run before disconnecting")
 @click.option('--test_import_speeds', default=False, type=click.BOOL, help="Uses line profiler to test speed of "
                                                                            "imports of custom util functions")
-def main(keyword, delivery, duration, test_import_speeds):
+@click.option('--kinesis_stream_name', default="", type=click.STRING, help="If kinesis stream name passed, individual records "
+                                                                           "also put into stream")
+def main(keyword, delivery, duration, test_import_speeds, kinesis_stream_name):
     """
     function for checking/testing tweepy streaming and search api locally before deploying as lambda image container
     For 'realtime' delivery - may need to use a trending topic as 'keyword' otherwise will have to wait a while to
@@ -34,7 +36,8 @@ def main(keyword, delivery, duration, test_import_speeds):
     event = {
         "keyword": keyword,
         "delivery": delivery,
-        'duration': duration
+        'duration': duration,
+        'kinesis_stream_name': kinesis_stream_name
     }
 
     context = {}

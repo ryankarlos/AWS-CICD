@@ -1,6 +1,8 @@
 import tweepy
 import time
 import json
+import boto3
+import base64
 
 
 class MyStreamListener(tweepy.Stream):
@@ -8,6 +10,10 @@ class MyStreamListener(tweepy.Stream):
     def __init__(self, event, consumer_key, consumer_secret, access_token, access_token_secret):
         self.start_time = time.time()
         self.time_limit = event['duration']
+        if event.get('kinesis_stream_name'):
+            self.stream_name = event['kinesis_stream_name']
+        else:
+            self.stream_name = None
         super().__init__(consumer_key, consumer_secret, access_token, access_token_secret)
 
     def on_data(self, data):
@@ -21,7 +27,7 @@ class MyStreamListener(tweepy.Stream):
             if tweet:
                 try:
                     if not tweet['text'].startswith('RT'):
-                        response = {'created_at': tweet['created_at'],
+                        payload = {'created_at': tweet['created_at'],
                                     'handle': tweet['user']['screen_name'],
                                     'text': tweet['text'],
                                     'favourite_count': tweet['user']['favourites_count'],
@@ -32,7 +38,10 @@ class MyStreamListener(tweepy.Stream):
                                     'location': tweet['user']['location'],
                                     'lang': tweet['user']['lang']
                                     }
-                        print(f"{response} \n")
+                        print(f"{payload}")
+                        if self.stream_name is not None:
+                            response = put_kinesis(payload, self.stream_name)
+                            print(f"{response} \n")
                 except KeyError:
                     # getting empty json in between stream so ignore these
                     pass
@@ -62,7 +71,11 @@ def tweepy_search_api(event, consumer_key, consumer_secret, access_token, access
         else:
             if not tweet.text.startswith('RT'):
                 counter += 1
-                response = {'created_at': tweet.created_at,
+                dt = tweet.created_at
+                payload = {'day': dt.day,
+                           'month': dt.month,
+                           'year': dt.year,
+                           'time': dt.time().strftime('%H:%M:%S'),
                             'handle': tweet.user.screen_name,
                              'text': tweet.text,
                              'favourite_count':tweet.user.favourites_count,
@@ -73,5 +86,22 @@ def tweepy_search_api(event, consumer_key, consumer_secret, access_token, access
                              'location': tweet.user.location,
                              'lang': tweet.user.lang
                              }
-                print(f"{response}")
+                print(f"{payload}")
+                if event.get('kinesis_stream_name'):
+                    response, base64_bytes = put_kinesis(payload, event['kinesis_stream_name'])
+                    print(f"Data converted to bytes {base64_bytes} and put into kinesis stream "
+                          f"with response:\n {response} \n")
+
+
+def put_kinesis(data, stream_name):
+    client = boto3.client('kinesis')
+    # base64 encode
+    message_bytes = json.dumps(data).encode('utf-8')
+    base64_bytes = base64.b64encode(message_bytes)
+    response = client.put_record(
+        StreamName=stream_name,
+        Data=base64_bytes,
+        PartitionKey='month'
+        )
+    return response, base64_bytes
 
