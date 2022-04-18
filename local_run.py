@@ -11,14 +11,31 @@ def profiled_function():
 
 
 @click.command()
-@click.argument('keyword',  type=click.STRING)
-@click.option('--delivery', default= 'search', type=click.Choice(['search', 'realtime']),
-              help="mode of delivery, using search api or realtime streaming api")
-@click.option('--duration', default=15, type=click.INT, help="How long (secs) to let stream run before disconnecting")
-@click.option('--test_import_speeds', default=False, type=click.BOOL, help="Uses line profiler to test speed of "
-                                                                           "imports of custom util functions")
-@click.option('--kinesis_stream_name', default="", type=click.STRING, help="If kinesis stream name passed, individual records "
-                                                                           "also put into stream")
+@click.argument("keyword", type=click.STRING)
+@click.option(
+    "--delivery",
+    default="search",
+    type=click.Choice(["search", "realtime"]),
+    help="mode of delivery, using search api or realtime streaming api",
+)
+@click.option(
+    "--duration",
+    default=15,
+    type=click.INT,
+    help="How long (secs) to let stream run before disconnecting",
+)
+@click.option(
+    "--test_import_speeds",
+    default=False,
+    type=click.BOOL,
+    help="Uses line profiler to test speed of " "imports of custom util functions",
+)
+@click.option(
+    "--kinesis_stream_name",
+    default="",
+    type=click.STRING,
+    help="If kinesis stream name passed, individual records " "also put into stream",
+)
 def main(keyword, delivery, duration, test_import_speeds, kinesis_stream_name):
     """
     function for checking/testing tweepy streaming and search api locally before deploying as lambda image container
@@ -36,8 +53,8 @@ def main(keyword, delivery, duration, test_import_speeds, kinesis_stream_name):
     event = {
         "keyword": keyword,
         "delivery": delivery,
-        'duration': duration,
-        'kinesis_stream_name': kinesis_stream_name
+        "duration": duration,
+        "kinesis_stream_name": kinesis_stream_name,
     }
 
     context = {}
