@@ -152,3 +152,35 @@ otherwise it expects a base-64-encoded input
 ```
 Invalid base64: "{"keyword": "machine learning", "delivery": "search", "duration": 15}"
 ```
+
+For subsequent builds, the existing function config would need to be updated to using
+the latest docker image
+
+
+```
+$ aws lambda update-function-code --function-name LambdaTwitter --image-uri <image-uri>
+
+{
+    "FunctionName": "LambdaTwitter",
+    "FunctionArn": "<functiom-arn>",
+    "Role": "<role-arn>",
+    "CodeSize": 0,
+    "Description": "",
+    "Timeout": 300,
+    "MemorySize": 1024,
+    "LastModified": "2022-04-18T04:27:04.000+0000",
+    "CodeSha256": "4682f2366dd01d79d8696de41d91bc85c286e5905018727f43c7dd7935002d62",
+    "Version": "$LATEST",
+    "TracingConfig": {
+        "Mode": "PassThrough"
+    },
+    "RevisionId": "66472954-e2ef-4461-b582-86d79a190da7",
+    "State": "Active",
+    "LastUpdateStatus": "InProgress",
+    "LastUpdateStatusReason": "The function is being created.",
+    "LastUpdateStatusReasonCode": "Creating",
+    "PackageType": "Image",
+    "ImageConfigResponse": {}
+}
+
+```
