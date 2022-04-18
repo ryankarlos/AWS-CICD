@@ -2,7 +2,6 @@ import tweepy
 import time
 import json
 import boto3
-import base64
 
 
 class MyStreamListener(tweepy.Stream):
@@ -88,20 +87,24 @@ def tweepy_search_api(event, consumer_key, consumer_secret, access_token, access
                              }
                 print(f"{payload}")
                 if event.get('kinesis_stream_name'):
-                    response, base64_bytes = put_kinesis(payload, event['kinesis_stream_name'])
-                    print(f"Data converted to bytes {base64_bytes} and put into kinesis stream "
+                    response, message_bytes = put_kinesis(payload, event['kinesis_stream_name'])
+                    print(f"Data utf-8 encoded {message_bytes} and put into kinesis stream "
                           f"with response:\n {response} \n")
 
 
 def put_kinesis(data, stream_name):
+    """
+    Put records into kinesis stream. Kinesis by default base64 encodes data entering stream so
+    we do not need to base64encode beforehand. Data is however, utf-8 encoded and message passed
+    to data parameter in kinesis client put_record method.
+    """
     client = boto3.client('kinesis')
     # base64 encode
     message_bytes = json.dumps(data).encode('utf-8')
-    base64_bytes = base64.b64encode(message_bytes)
     response = client.put_record(
         StreamName=stream_name,
-        Data=base64_bytes,
+        Data=message_bytes,
         PartitionKey='month'
         )
-    return response, base64_bytes
+    return response, message_bytes
 
