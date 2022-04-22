@@ -2,5 +2,4 @@ twitter_conf.ini
 __pycache__/
 .idea
 outfile.json
-appspec.yaml
 .DS_Store
