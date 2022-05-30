@@ -14,12 +14,28 @@ Resources:
             Action:
               - 'sts:AssumeRole'
       Path: /
-      ManagedPolicyArns:
-        - "arn:aws:iam::aws:policy/AWSCodeCommitFullAccess"
-        - "arn:aws:iam::aws:policy/AWSCodeBuildAdminAccess"
-        - "arn:aws:iam::aws:policy/AWSCodeDeployFullAccess"
-        - "arn:aws:iam::aws:policy/AWSCloudFormationReadOnlyAccess"
-        - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+      Policies:
+        - PolicyName: "CodePipelineServicePolicy"
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'CloudFormation:*'
+                  - 'codebuild:*'
+                  - 'codedeploy:*'
+                  - 'codecommit:*'
+                  - 'elasticbeanstalk:*'
+                  - 'ec2:*'
+                  - 'ecs:*'
+                  - 's3:*'
+                  - 'logs:*'
+                  - 'elasticloadbalancing:*'
+                  - 'autoscaling:*'
+                  - 'lambda:InvokeFunction'
+                  - 'lambda:ListFunctions'
+                  - 'iam:PassRole'
+                Resource: '*'
   Codebuild:
     Type: 'AWS::IAM::Role'
     Properties:
