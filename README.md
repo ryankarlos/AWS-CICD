@@ -18,10 +18,25 @@ in the ~/.ssh directory:  `chmod 600 config`
 
 Clone your repository to your local computer and start working on code. Run the following command:
 
-#### Configuring pushing to both CodeCommit and Github
+#### Optional: Configuring pushing to both CodeCommit and Github
 
-Since code in codecommit and github cannot be automatically synced, ive configured git to push  to both code commit 
-and github repos when running `git push origin master`
+Since code in codecommit and github cannot be automatically synced, you can configure git to push 
+to both code commit and github repos when running `git push origin master`
+
+When ssh codecommit repo to local, remote url is set automatically for 
+fetch and push.
+
+`
+$ git remote -v
+origin	ssh://git-codecommit.us-east-1.amazonaws.com/v1/repos/deploy-lambda-image (fetch)
+origin	ssh://git-codecommit.us-east-1.amazonaws.com/v1/repos/deploy-lambda-image (push)
+`
+
+we will have to manually add an extra push-url for github repo 
+
+`
+$ git remote set-url --add --push git://another/repo.git
+`
 
 origin maps to both github and aws code commit repo urls for git push actions
 
@@ -36,5 +51,5 @@ Note: May need to run the following to add ssh key if get `Permission denied (pu
 trying to push to remote
 
 ```
-ssh-add --apple-use-keychain ~/.ssh/codecommit_rsa
+$ ssh-add --apple-use-keychain ~/.ssh/codecommit_rsa
 ```
