@@ -1,5 +1,5 @@
 twitter_conf.ini
 __pycache__/
 .idea
-outfile.json
+examples/deploy-lambda-image/outfile.json
 .DS_Store
