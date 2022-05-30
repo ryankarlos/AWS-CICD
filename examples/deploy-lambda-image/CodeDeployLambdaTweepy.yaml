@@ -1,0 +1,17 @@
+Parameters:
+  ECRRepoName:
+    Default: "tweepy-stream-deploy"
+    Description: Repo Name of ECR Repo .e.g tweepy-stream-deploy
+    Type: String
+Resources:
+  LambdaImageStaging:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      PackageType: Image
+      FunctionName: "codedeploy-staging"
+      Code:
+        ImageUri: !Sub '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ECRRepoName}:latest'
+      Role:
+        Fn::ImportValue: RoleLambdaImage-TwitterArn
+      Timeout: 301
+      MemorySize: 1024

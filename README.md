@@ -53,3 +53,28 @@ trying to push to remote
 ```
 $ ssh-add --apple-use-keychain ~/.ssh/codecommit_rsa
 ```
+
+### CodeBuild
+
+First need to include a buildspec.yml file, which CodeBuild uses to run a build.
+https://docs.aws.amazon.com/codebuild/latest/userguide/getting-started-cli-create-build-spec.html
+
+The following documentation shows how the codebuild project can be setup
+https://docs.aws.amazon.com/codebuild/latest/userguide/sample-docker.html
+
+For Operating system, choose Ubuntu.
+For Runtime, choose Standard.
+For Image, choose aws/codebuild/standard:4.0.
+
+For codebuild projects involving building docker images as in the examples in this
+repo, follow the AWS doc below
+https://docs.aws.amazon.com/codebuild/latest/userguide/sample-docker.html
+
+Make sure the option, "Privileged" is ticked in build project if building docker image
+Important to set the following environment variables as they are referenced to
+in the buildspec.yml
+
+* AWS_DEFAULT_REGION with a value of region-ID
+* AWS_ACCOUNT_ID with a value of account-ID
+* IMAGE_TAG with a value of Latest
+* IMAGE_REPO_NAME with a value of Amazon-ECR-repo-name
