@@ -1,26 +1,6 @@
-# AWS Codepipeline Demo
+# Deploy Tweepy Streaming App Code to Lambda Image 
 Demo of using code pipeline to build docker container and running with lambda function invocation  
-This application is using tweepy for streaming tweets 
-
-
-## Setting up ssh (note to self)
-
-Currently configured to push to both code commit and github repos when 
-runnin `git push origin master`
-
-```
-$ git remote -v
-origin	ssh://git-codecommit.us-east-1.amazonaws.com/v1/repos/codecommit_dockerbuild (fetch)
-origin	git@github.com:ryankarlos/codepipeline.git (push)
-origin	ssh://git-codecommit.us-east-1.amazonaws.com/v1/repos/codecommit_dockerbuild (push)
-```
-
-May need to run the following to add ssh key if get `Permission denied (publickey)` error when
-trying to push to remote
-
-```
-ssh-add --apple-use-keychain ~/.ssh/codecommit_rsa
-```
+This application is using tweepy for streaming tweets
 
 #### Running local script
 
