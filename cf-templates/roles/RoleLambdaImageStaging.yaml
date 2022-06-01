@@ -25,6 +25,7 @@ Resources:
                   - 'secretsmanager:*'
                   - 'kms:*'
                   - 'logs:*'
+                  - 'codepipeline:PutJob*'
                 Resource: '*'
 Outputs:
   TwitterArn:
