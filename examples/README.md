@@ -70,20 +70,40 @@ Line #      Hits         Time  Per Hit   % Time  Line Contents
     10         1          2.0      2.0      0.0      from tweets_api import tweepy_search_api
 ```
 
+##### Creating code pipeline and artifacts
+
+zip the cf templates rquired to pass into code pipeline as artifacts and copy to S3 bucket
+
+```
+$ cd cf-templates 
+$ zip template-source-artifacts.zip CodeDeployLambdaTweepy.yaml roles/*
+
+  adding: CodeDeployLambdaTweepy.yaml (deflated 42%)
+  adding: roles/CloudFormationRole.yaml (deflated 59%)
+  adding: roles/CodepipelineRole.yaml (deflated 79%)
+  adding: roles/RoleLambdaImageStaging.yaml (deflated 58%)
+  
+$ aws s3 cp template-source-artifacts.zip s3://codepipeline-us-east-1-49345350114/lambda-image-deploy/template-source-artifacts.zip
+
+upload: ./template-source-artifacts.zip to s3://codepipeline-us-east-1-49345350114/lambda-image-deploy/template-source-artifacts.zip
+```
+
 #### Triggering code pipeline and building docker image
 
 <img width="1000" alt="screnshots/codepipeline_executionhistory" src="https://github.com/ryankarlos/codepipeline/blob/master/screenshots/codepipeline_stages.png">
 
-
 Code Pipeline has been configured to trigger with every push to github/code commit repo. This will
-start the build phase, which runs the commands in buildspec.yml in different phases of build process
+start the source stage, output artifacts and move to build phase, which runs the commands in buildspec.yml in 
+different phases of build process
 https://docs.aws.amazon.com/codebuild/latest/userguide/getting-started-cli-create-build-spec.html
+
+Alternatively, on the pipeline details page, choose Release change. This runs the most recent revision available in 
+each source location specified in a source action through the pipeline.
 
 Environment variables are defined and new roles defined when creating code build stage.
 https://docs.aws.amazon.com/codebuild/latest/userguide/sample-docker.html
 
 <img width="1000" alt="screnshots/codepipeline_executionhistory" src="https://github.com/ryankarlos/codepipeline/blob/master/screenshots/codepipeline_executionhistory.png">
-
 
 #### Setting up and in invoking lambda function to execute code in container
 
