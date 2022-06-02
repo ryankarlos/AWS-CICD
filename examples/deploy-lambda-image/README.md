@@ -1,6 +1,10 @@
 # Deploy Tweepy Streaming App Code to Lambda Image 
-Demo of using code pipeline to build docker container and running with lambda function invocation  
-This application is using tweepy for streaming tweets
+The code pipeline workflow is represented diagramatically for this use case. We will be deploying an application container to lambda which streams tweets 
+about a topic for a chosen duration.The updates to required roles and deployment of Lambda Image resource is automated using CloudFormation templates.
+In the intended workflow, the user commits to CodeCommit which triggers codepipeline execution via EventBridge. This executes Source Stage (which fetches
+cloud formation templates from S3), Build Stage (builds application code and pushes to ECR), Deploy Stage (which deploys to Lambda container resource) and finally runs end to end test on the deployed code to check it executes/functions as expected.
+
+<img src="https://github.com/ryankarlos/AWS-CICD/blob/master/screenshots/architecture_tweets_deploy_lambda-container.png"></img>
 
 #### Running local script
 
