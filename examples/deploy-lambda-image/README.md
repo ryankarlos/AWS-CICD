@@ -158,7 +158,10 @@ revision available in each source location specified in a source action through 
 
 <img width="1000" src="https://github.com/ryankarlos/codepipeline/blob/master/screenshots/codepipeline_executionhistory.png">
 
-Once the pipeline has finished, we can check CloudWatch to see the invocation logs in the corresponding log stream
+Once the pipeline has finished, we can check CloudWatch to see the invocation logs in the corresponding log stream. 
+The `main_twitter.handler` includes  `put_job_success_result` and `put_job_failure_result` codepipeline client methods
+to return the success/failure of the lambda execution to the pipeline, which will terminate the `LambdaInvocationTest` stage 
+with success or failure appropriately.
 
 <img width="1000" src="https://github.com/ryankarlos/codepipeline/blob/master/screenshots/lambda_invocation_logs.png.png">
 
