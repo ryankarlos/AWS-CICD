@@ -1,0 +1,12 @@
+{
+  "source": ["aws.s3"],
+  "detail-type": ["AWS API Call via CloudTrail"],
+  "detail": {
+    "eventSource": ["s3.amazonaws.com"],
+    "eventName": ["PutObject", "CompleteMultipartUpload", "CopyObject"],
+    "requestParameters": {
+      "bucketName": ["codepipeline-us-east-1-49345350114"],
+      "key": ["lambda-image-deploy/template-source-artifacts.zip"]
+    }
+  }
+}
