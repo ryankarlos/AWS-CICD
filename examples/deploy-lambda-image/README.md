@@ -6,7 +6,7 @@ cloud formation templates from S3), Build Stage (builds application code and pus
 
 <img src="https://github.com/ryankarlos/AWS-CICD/blob/master/screenshots/architecture_tweets_deploy_lambda-container.png"></img>
 
-#### Running local script
+## Running local script
 
 * Need to install click https://click.palletsprojects.com/en/8.1.x/quickstart/ in virtual environment
 The command and argument options can be viewed in cli by running command below 
@@ -74,7 +74,7 @@ Line #      Hits         Time  Per Hit   % Time  Line Contents
     10         1          2.0      2.0      0.0      from tweets_api import tweepy_search_api
 ```
 
-##### Creating source repo, roles, artifacts and code pipeline
+### Creating source repo, roles, artifacts and code pipeline
 
 Setup codecommit repo as detailed in main `README.md` to contain all the code in this folder `deploy-lambda-image`
 
@@ -137,7 +137,7 @@ aws codepipeline list-pipelines
 ```
 
 
-#### Triggering code pipeline 
+## Triggering code pipeline 
 
 Once the pipeline has been created above, it will automatically execute
 
@@ -163,9 +163,9 @@ The `main_twitter.handler` includes  `put_job_success_result` and `put_job_failu
 to return the success/failure of the lambda execution to the pipeline, which will terminate the `LambdaInvocationTest` stage 
 with success or failure appropriately.
 
-<img width="1000" src="https://github.com/ryankarlos/codepipeline/blob/master/screenshots/lambda_invocation_logs.png.png">
+<img width="1000" src="https://github.com/ryankarlos/codepipeline/blob/master/screenshots/lambda_invocation_logs.png">
 
-### Manual Method of Lambda Image Deployment and Execution via cli
+## Optional: Manual Method of Lambda Image Deployment and Execution via cli
 
 CodePipeline already automates these steps. However, for more control over creating and invoking the function, 
 we can do this manually via the cli (assuming ECR URI has the build we need)
@@ -204,8 +204,6 @@ $ aws lambda invoke --function-name <lambda-arn> --payload '{ "keyword": "machin
     "ExecutedVersion": "$LATEST"
 }
 ```
-<img width="1000" alt="cloudwatch_lambda_executions" src="https://github.com/ryankarlos/codepipeline/blob/master/screenshots/cloudwatch_lambda_executions.png">
-
 
 Note that, ive set the --cli-binary-format parameter to raw-in-base64-out. Otherwise, i got the following error below.
 On google searching, i found this useful blog diagnosing the error https://bobbyhadz.com/blog/aws-cli-invalid-base64-lambda-error
