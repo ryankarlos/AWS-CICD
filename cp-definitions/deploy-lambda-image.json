@@ -1,0 +1,248 @@
+{
+    "pipeline": {
+        "name": "lambda-image-deploy",
+        "roleArn": "arn:aws:iam::376337229415:role/CodePipelineRole",
+        "artifactStore": {
+            "type": "S3",
+            "location": "codepipeline-us-east-1-49345350114"
+        },
+        "stages": [
+            {
+                "name": "Source",
+                "actions": [
+                    {
+                        "name": "CodeCommitSource",
+                        "actionTypeId": {
+                            "category": "Source",
+                            "owner": "AWS",
+                            "provider": "CodeCommit",
+                            "version": "1"
+                        },
+                        "runOrder": 1,
+                        "configuration": {
+                            "BranchName": "master",
+                            "OutputArtifactFormat": "CODE_ZIP",
+                            "PollForSourceChanges": "false",
+                            "RepositoryName": "deploy-lambda-image"
+                        },
+                        "outputArtifacts": [
+                            {
+                                "name": "CodeCommitSourceArtifact"
+                            }
+                        ],
+                        "inputArtifacts": [],
+                        "region": "us-east-1",
+                        "namespace": "SourceVariables"
+                    },
+                    {
+                        "name": "CFTemplatesArtifact",
+                        "actionTypeId": {
+                            "category": "Source",
+                            "owner": "AWS",
+                            "provider": "S3",
+                            "version": "1"
+                        },
+                        "runOrder": 1,
+                        "configuration": {
+                            "PollForSourceChanges": "false",
+                            "S3Bucket": "codepipeline-us-east-1-49345350114",
+                            "S3ObjectKey": "lambda-image-deploy/template-source-artifacts.zip"
+                        },
+                        "outputArtifacts": [
+                            {
+                                "name": "CFTemplatesArtifact"
+                            }
+                        ],
+                        "inputArtifacts": [],
+                        "region": "us-east-1"
+                    }
+                ]
+            },
+            {
+                "name": "Build",
+                "actions": [
+                    {
+                        "name": "Build-Tweepy-Stream",
+                        "actionTypeId": {
+                            "category": "Build",
+                            "owner": "AWS",
+                            "provider": "CodeBuild",
+                            "version": "1"
+                        },
+                        "runOrder": 1,
+                        "configuration": {
+                            "BatchEnabled": "false",
+                            "EnvironmentVariables": "[{\"name\":\"IMAGE_REPO_NAME\",\"value\":\"tweepy-stream-deploy\",\"type\":\"PLAINTEXT\"},{\"name\":\"IMAGE_TAG\",\"value\":\"latest\",\"type\":\"PLAINTEXT\"},{\"name\":\"AWS_DEFAULT_REGION\",\"value\":\"us-east-1\",\"type\":\"PLAINTEXT\"},{\"name\":\"AWS_ACCOUNT_ID\",\"value\":\"376337229415\",\"type\":\"PLAINTEXT\"}]",
+                            "ProjectName": "Build-Twitter-Stream"
+                        },
+                        "outputArtifacts": [],
+                        "inputArtifacts": [
+                            {
+                                "name": "CodeCommitSourceArtifact"
+                            }
+                        ],
+                        "region": "us-east-1"
+                    }
+                ]
+            },
+            {
+                "name": "DeployLambda",
+                "actions": [
+                    {
+                        "name": "RoleCloudFormationforCodeDeploy",
+                        "actionTypeId": {
+                            "category": "Deploy",
+                            "owner": "AWS",
+                            "provider": "CloudFormation",
+                            "version": "1"
+                        },
+                        "runOrder": 1,
+                        "configuration": {
+                            "ActionMode": "CREATE_UPDATE",
+                            "Capabilities": "CAPABILITY_NAMED_IAM",
+                            "RoleArn": "arn:aws:iam::376337229415:role/CloudFormationRole",
+                            "StackName": "RoleCloudFormationforCodeDeploy",
+                            "TemplatePath": "CFTemplatesArtifact::roles/CloudFormationRole.yaml"
+                        },
+                        "outputArtifacts": [],
+                        "inputArtifacts": [
+                            {
+                                "name": "CFTemplatesArtifact"
+                            }
+                        ],
+                        "region": "us-east-1"
+                    },
+                    {
+                        "name": "RoleCodePipeline",
+                        "actionTypeId": {
+                            "category": "Deploy",
+                            "owner": "AWS",
+                            "provider": "CloudFormation",
+                            "version": "1"
+                        },
+                        "runOrder": 1,
+                        "configuration": {
+                            "ActionMode": "CREATE_UPDATE",
+                            "Capabilities": "CAPABILITY_NAMED_IAM",
+                            "RoleArn": "arn:aws:iam::376337229415:role/CloudFormationRole",
+                            "StackName": "RoleCodePipeline",
+                            "TemplatePath": "CFTemplatesArtifact::roles/CodepipelineRole.yaml"
+                        },
+                        "outputArtifacts": [],
+                        "inputArtifacts": [
+                            {
+                                "name": "CFTemplatesArtifact"
+                            }
+                        ],
+                        "region": "us-east-1"
+                    },
+                    {
+                        "name": "RoleLambdaContainerforCodeDeploy",
+                        "actionTypeId": {
+                            "category": "Deploy",
+                            "owner": "AWS",
+                            "provider": "CloudFormation",
+                            "version": "1"
+                        },
+                        "runOrder": 1,
+                        "configuration": {
+                            "ActionMode": "CREATE_UPDATE",
+                            "Capabilities": "CAPABILITY_NAMED_IAM",
+                            "RoleArn": "arn:aws:iam::376337229415:role/CloudFormationRole",
+                            "StackName": "RoleLambdaImage",
+                            "TemplatePath": "CFTemplatesArtifact::roles/RoleLambdaImageStaging.yaml"
+                        },
+                        "outputArtifacts": [],
+                        "inputArtifacts": [
+                            {
+                                "name": "CFTemplatesArtifact"
+                            }
+                        ],
+                        "region": "us-east-1"
+                    },
+                    {
+                        "name": "DeleteExistingLambdaImage",
+                        "actionTypeId": {
+                            "category": "Deploy",
+                            "owner": "AWS",
+                            "provider": "CloudFormation",
+                            "version": "1"
+                        },
+                        "runOrder": 2,
+                        "configuration": {
+                            "ActionMode": "DELETE_ONLY",
+                            "RoleArn": "arn:aws:iam::376337229415:role/CloudFormationRole",
+                            "StackName": "CodeDeployLambdaTweets"
+                        },
+                        "outputArtifacts": [],
+                        "inputArtifacts": [
+                            {
+                                "name": "CFTemplatesArtifact"
+                            }
+                        ],
+                        "region": "us-east-1"
+                    },
+                    {
+                        "name": "DeployLambdaImage",
+                        "actionTypeId": {
+                            "category": "Deploy",
+                            "owner": "AWS",
+                            "provider": "CloudFormation",
+                            "version": "1"
+                        },
+                        "runOrder": 3,
+                        "configuration": {
+                            "ActionMode": "CREATE_UPDATE",
+                            "OutputFileName": "lambda-codedeploy-output",
+                            "RoleArn": "arn:aws:iam::376337229415:role/CloudFormationRole",
+                            "StackName": "CodeDeployLambdaTweets",
+                            "TemplatePath": "CFTemplatesArtifact::CodeDeployLambdaTweepy.yaml"
+                        },
+                        "outputArtifacts": [
+                            {
+                                "name": "LambdaDeployArtifact"
+                            }
+                        ],
+                        "inputArtifacts": [
+                            {
+                                "name": "CFTemplatesArtifact"
+                            }
+                        ],
+                        "region": "us-east-1"
+                    }
+                ]
+            },
+            {
+                "name": "LambdaInvocationTest",
+                "actions": [
+                    {
+                        "name": "LambdaStagingInvocation",
+                        "actionTypeId": {
+                            "category": "Invoke",
+                            "owner": "AWS",
+                            "provider": "Lambda",
+                            "version": "1"
+                        },
+                        "runOrder": 1,
+                        "configuration": {
+                            "FunctionName": "codedeploy-staging",
+                            "UserParameters": "{\"keyword\": \"Machine Learning\", \"duration\":10}"
+                        },
+                        "outputArtifacts": [
+                            {
+                                "name": "LambdaInvocationArtifact"
+                            }
+                        ],
+                        "inputArtifacts": [
+                            {
+                                "name": "LambdaDeployArtifact"
+                            }
+                        ],
+                        "region": "us-east-1"
+                    }
+                ]
+            }
+        ],
+        "version": 30
+    }
+}

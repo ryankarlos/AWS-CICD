@@ -70,9 +70,28 @@ Line #      Hits         Time  Per Hit   % Time  Line Contents
     10         1          2.0      2.0      0.0      from tweets_api import tweepy_search_api
 ```
 
-##### Creating code pipeline and artifacts
+##### Creating source repo, roles, artifacts and code pipeline
 
-zip the cf templates rquired to pass into code pipeline as artifacts and copy to S3 bucket
+Setup codecommit repo as detailed in main `README.md` to contain all the code in this folder `deploy-lambda-image`
+
+The cf templates folder contains the roles resources and deployment resource configs. We will need to create 
+these stacks with cloudformation before they are used within the pipeline for stack updates
+https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-cli-creating-stack.html
+
+```
+$ aws cloudformation create-stack --stack-name CodeDeployLambdaTweets --template-body file://cf-templates/CodeDeployLambdaTweepy.yaml
+
+$ aws cloudformation create-stack --stack-name RoleCloudFormationforCodeDeploy --template-body file://cf-templates/roles/CloudFormationRole.yaml
+
+$ aws cloudformation create-stack --stack-name RoleCodePipeline --template-body file://cf-templates/roles/CodepipelineRole.yaml
+
+$ aws cloudformation create-stack --stack-name RoleLambdaImage --template-body file://cf-templates/roles/RoleLambdaImageStaging.yaml
+```
+
+Zip the cf templates folder in main repo, not included in the application code `deploy-lambda-image` source repo. 
+This is required for the Deploy stage in codepipeline and needs to be read in the source stage and output as artifacts.
+We will copy this zipped folder to S3 and configure code pipeline in defintion file so that action in source stage 
+reads from the s3 location of template file
 
 ```
 $ cd cf-templates 
@@ -88,24 +107,61 @@ $ aws s3 cp template-source-artifacts.zip s3://codepipeline-us-east-1-4934535011
 upload: ./template-source-artifacts.zip to s3://codepipeline-us-east-1-49345350114/lambda-image-deploy/template-source-artifacts.zip
 ```
 
-#### Triggering code pipeline and building docker image
+Then create codepipeline from the definition json file in `codepipeline_definitions/deploy-lambda-image.json` using 
+the command below (assuming run from the root of this repo) https://docs.aws.amazon.com/codepipeline/latest/userguide/pipelines-create.html
+The definition json assumes code pipeline role is created before and 
 
-<img width="1000" alt="screnshots/codepipeline_executionhistory" src="https://github.com/ryankarlos/codepipeline/blob/master/screenshots/codepipeline_stages.png">
+```
+$ aws codepipeline create-pipeline --cli-input-json file://cp-definitions/deploy-lambda-image.json
+```
 
-Code Pipeline has been configured to trigger with every push to github/code commit repo. This will
-start the source stage, output artifacts and move to build phase, which runs the commands in buildspec.yml in 
-different phases of build process
+This should create the pipeline which should be visible in the console or via cli `list-pipelines` 
+
+```
+aws codepipeline list-pipelines
+{
+    "pipelines": [
+        {
+            "name": "lambda-image-deploy",
+            "version": 30,
+            "created": "2022-05-30T03:11:28.501000+01:00",
+            "updated": "2022-06-02T00:19:21.596000+01:00"
+        }
+    ]
+}
+
+```
+
+
+#### Triggering code pipeline 
+
+Once the pipeline has been created above, it will automatically execute
+
+<img width="1000" src="https://github.com/ryankarlos/codepipeline/blob/master/screenshots/TweetsLambdaDeploy-pipelineviz-1.png">
+
+<img width="1000" src="https://github.com/ryankarlos/codepipeline/blob/master/screenshots/TweetsLambdaDeploy-pipelineviz-2.png">
+
+Code Pipeline has been configured to trigger with every push to CodeCommit via EventBridge. This will
+start the source stage, transition to build phase if successful where the commands in buildspec.yml  will be executed 
+in different phases of build process
 https://docs.aws.amazon.com/codebuild/latest/userguide/getting-started-cli-create-build-spec.html
+Finally it will transition to Deploy and TestInvocation Stages if successful (as in diagram above). 
 
-Alternatively, on the pipeline details page, choose Release change. This runs the most recent revision available in 
-each source location specified in a source action through the pipeline.
+CodePipeline will also trigger automatically if the source artifact zip in S3 is updated. 
 
-Environment variables are defined and new roles defined when creating code build stage.
-https://docs.aws.amazon.com/codebuild/latest/userguide/sample-docker.html
+For manual triggering, choose Release change on the pipeline details page on the console. This runs the most recent 
+revision available in each source location specified in a source action through the pipeline.
 
-<img width="1000" alt="screnshots/codepipeline_executionhistory" src="https://github.com/ryankarlos/codepipeline/blob/master/screenshots/codepipeline_executionhistory.png">
+<img width="1000" src="https://github.com/ryankarlos/codepipeline/blob/master/screenshots/codepipeline_executionhistory.png">
 
-#### Setting up and in invoking lambda function to execute code in container
+Once the pipeline has finished, we can check CloudWatch to see the invocation logs in the corresponding log stream
+
+<img width="1000" src="https://github.com/ryankarlos/codepipeline/blob/master/screenshots/lambda_invocation_logs.png.png">
+
+### Manual Method of Lambda Image Deployment and Execution via cli
+
+CodePipeline already automates these steps. However, for more control over creating and invoking the function, 
+we can do this manually via the cli (assuming ECR URI has the build we need)
 
 To create a new function - you can either do it via console or follow the cli command here.
 You would need to create a new role and  grant permissions to lambda to performa actions to other
