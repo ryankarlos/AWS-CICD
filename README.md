@@ -261,7 +261,7 @@ def handler(event, context):
         raise
 ```
 
-### Deploy Stage
+### Setting up Deploy Stage
 
 if Using CodeDeploy, need to do the following steps:
 
