@@ -42,8 +42,10 @@ Deploy to ProdEnv
 This deploys the application to a production environment. Could configure the pipeline so this stage
 requires manual approval to execute https://docs.aws.amazon.com/codepipeline/latest/userguide/approvals-action-add.html.
 
-### Setting up CodeCommit Source Stage
+### Setting up Source Stage
 
+
+#### CodeCommit 
 This assumes using ssh keys and on mac-os. If not setup ssh keys already using `ssh-keygen` as in
 https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-ssh-unixes.html
 Upload your SSH public key to your IAM user. Once you have uploaded your SSH public key, copy the SSH Key ID.
@@ -108,24 +110,32 @@ trying to push to remote
 $ ssh-add --apple-use-keychain ~/.ssh/codecommit_rsa
 ```
 
+#### Other Actions in Source Stage
+
+We could also use the source stage to read in other files and output them as artifacts to be
+used in downstream stages in pipeline. E.g. reading template configs zipped folder from S3 and using that as
+input artifact to CloudFormation stack.
+
+
 ### Setting up Build Stage
 
 First need to include a buildspec.yml file, which CodeBuild uses to run a build.
 https://docs.aws.amazon.com/codebuild/latest/userguide/getting-started-cli-create-build-spec.html
 
-The following documentation shows how the codebuild project can be setup
-https://docs.aws.amazon.com/codebuild/latest/userguide/sample-docker.html
+Then you create a build project that AWS CodeBuild uses to run the build. A build project 
+includes information about how to run a build, including where to get the source code, which 
+build environment to use, which build commands to run, and where to store the build output.
+https://docs.aws.amazon.com/codebuild/latest/userguide/getting-started-create-build-project-console.html
+https://docs.aws.amazon.com/codebuild/latest/userguide/getting-started-run-build-console.html
 
 For Operating system, choose Ubuntu.
 For Runtime, choose Standard.
 For Image, choose aws/codebuild/standard:4.0.
 
-For codebuild projects involving building docker images as in the examples in this
-repo, follow the AWS doc below
+For codebuild projects involving building docker image to push to ECR, follow the AWS doc below
 https://docs.aws.amazon.com/codebuild/latest/userguide/sample-docker.html
-
 Make sure the option, "Privileged" is ticked in build project if building docker image
-Important to set the following environment variables as they are referenced to
+Also, Important to set the following environment variables as they are referenced to
 in the buildspec.yml
 
 * AWS_DEFAULT_REGION with a value of region-ID
@@ -253,11 +263,33 @@ def handler(event, context):
 
 ### Deploy Stage
 
+if Using CodeDeploy, need to do the following steps:
 
+* Create application with Compute platform  e.g. (ECS, EC2, Lambda etc) https://docs.aws.amazon.com/codedeploy/latest/userguide/applications-create.html
+* Deployment-group associated with the application including the specific resources created (e.g for ECS : cluster names, 
+  load balancer), service role, deployment configuration (e.g. CodeDeployDefault.OneAtATime) and traffic routing 
+  https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-groups-create.html
+* Create Deployment associated with the deployment group, using the revision at the specified location e.g. S3 or by 
+  using AppSpec yaml/json. A
+* In Deploy Stage, using  CodeDeploy as Action Provider and the reference the application name and 
+deployment group already created. 
 
+For CloudFormation, need to do the following from console:
 
+* select CloudFormation as Action provider in Deploy Stage in CodePipeline.
+* Input Artifact would need to be the CloudFormation Template script which is output from one of the 
+previous stages e.g. Source
+* ActionMode will depend on whether create or update stack, delete stack or create/execute changeset.
+* Template filename path with reference to the input artifact (the template filepath is generated 
+automatically depending on the filename set)
+* Cloud Formation RoleName
+* Optional Output Artifact Name
 
-#### Cloud Formation Templates 
-
-if using cloud formation as deploy 
-aws cloudformation validate-template --template-body file:///home/local/test/sampletemplate.json
+Optionally, we can validate the cloudformation templates before deploying by using `aws cloudformation validate-template --template-url <s3_url>` 
+(remote) or `aws cloudformation validate-template --template-body <file://path-to-local-file>` (local) command to check the template file 
+for syntax errors. During validation, AWS CloudFormation first checks if the template is valid JSON. If it isn't, 
+CloudFormation checks if the template is valid YAML. If both checks fail, CloudFormation returns a template validation 
+error https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-validate-template.html. Note: The aws 
+cloudformation validate-template command is designed to check only the syntax of your template. It does not ensure 
+that the property values that you have specified for a resource are valid for that resource. Nor does it determine 
+the number of resources that will exist when the stack is created.
