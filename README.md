@@ -3,8 +3,49 @@
 Examples of setting up CI-CD pipelines using AWS code pipeline for software delivery automation. Using CodeCommit, 
 CodeBuild and CodeDeploy for versioning, building, testing and deploying applications in the cloud.
 
-#### Setting up code commit source repo
+### Setting up Code Pipeline 
 
+We will configure AWS CodePipeline to execute the package and deploy steps automatically 
+on every update of our code repository.
+
+Typically a codepipeline job contains the following stages but could be fewer or more
+depending on the application for e.g. could have more envs for testing before deplopyoing to 
+prod.
+https://docs.aws.amazon.com/codepipeline/latest/userguide/concepts-devops-example.html
+https://docs.aws.amazon.com/codepipeline/latest/userguide/concepts.html
+
+Source
+In this step the latest version of our source code will be fetched from our repository and uploaded to an S3 bucket.
+The application source code is maintained in a repository configured as a GitHub source action in the pipeline. 
+When developers push commits to the repository, CodePipeline detects the pushed change, and a pipeline execution 
+starts from the Source Stage. The GitHub source action completes successfully (that is, the latest changes 
+have been downloaded and stored to the artifact bucket unique to that execution). The output artifacts 
+produced by the GitHub source action, which are the application files from the repository, are then used as 
+the input artifacts to be worked on by the actions in the next stage.
+
+Build
+During the build step we will use this uploaded source code and automate our manual packaging step using a CodeBuild project.
+The build task pulls a build environment image and builds the application in a virtual container.
+
+Unit Test
+The next action in the Prod Stage is a unit test project created in CodeBuild and configured as a test action in 
+the pipeline. 
+
+Deploy to Dev/Test Env
+This deploys the application to a dev/test env environment using CodeDeploy or another action 
+provider such as CloudFormation.
+
+Integration Test
+This runs end to end Integration testing project created in CodeBuild and configured as a test action in the pipeline.
+
+Deploy to ProdEnv
+This deploys the application to a production environment. Could configure the pipeline so this stage
+requires manual approval to execute https://docs.aws.amazon.com/codepipeline/latest/userguide/approvals-action-add.html.
+
+### Setting up CodeCommit Source Stage
+
+This assumes using ssh keys and on mac-os. If not setup ssh keys already using `ssh-keygen` as in
+https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-ssh-unixes.html
 Upload your SSH public key to your IAM user. Once you have uploaded your SSH public key, copy the SSH Key ID.
 Edit your SSH configuration file named "config" in your local ~/.ssh directory. 
 Add the following lines to the file, where the value for User is the SSH Key ID.
@@ -16,7 +57,20 @@ IdentityFile ~/.ssh/Your-Private-Key-File-Name-Here
 Once you have saved the file, make sure it has the right permissions by running the following command 
 in the ~/.ssh directory:  `chmod 600 config`
 
+Create a new code commit as in repo https://docs.aws.amazon.com/codecommit/latest/userguide/how-to-create-repository.html
+
+```
+aws codecommit create-repository --repository-name MyDemoRepo --repository-description "My demonstration repository" 
+```
+
 Clone your repository to your local computer and start working on code. Run the following command:
+https://docs.aws.amazon.com/codecommit/latest/userguide/how-to-connect.html
+You can get the ssh uri from the console under Clone URL for the code commit repo
+
+```
+$ git clone ssh://git-codecommit.us-east-1.amazonaws.com/v1/repos/MyDemoRepo 
+```
+
 
 #### Optional: Configuring pushing to both CodeCommit and Github
 
@@ -54,24 +108,7 @@ trying to push to remote
 $ ssh-add --apple-use-keychain ~/.ssh/codecommit_rsa
 ```
 
-#### Setting up Code Pipeline and Stages
-
-We will configure AWS CodePipeline to execute the package and deploy steps automatically 
-on every update of our code repository.
-
-A typical code pipeline has 3 stages:
-
-Source
-In this step the latest version of our source code will be fetched from our repository and uploaded to an S3 bucket.
-
-Build
-During the build step we will use this uploaded source code and automate our manual packaging step using a CodeBuild project.
-
-Deploy
-In the deploy step we will use CloudFormation in order to create and execute the changeset that will eventually build the entire infrastructure.
-
-
-### CodeBuild
+### Setting up Build Stage
 
 First need to include a buildspec.yml file, which CodeBuild uses to run a build.
 https://docs.aws.amazon.com/codebuild/latest/userguide/getting-started-cli-create-build-spec.html
@@ -97,7 +134,7 @@ in the buildspec.yml
 * IMAGE_REPO_NAME with a value of Amazon-ECR-repo-name
 
 
-#### Checking docker image contents from ECR
+#### Optional: Checking docker image contents from ECR
 
 For images built from CodeBuild and pushed to ECR, if you want to check contents or run docker image locally from 
 Amazon ECR, you can pull it to your local environment with the docker pull command. 
@@ -213,3 +250,14 @@ def handler(event, context):
             )
         raise
 ```
+
+### Deploy Stage
+
+
+
+
+
+#### Cloud Formation Templates 
+
+if using cloud formation as deploy 
+aws cloudformation validate-template --template-body file:///home/local/test/sampletemplate.json

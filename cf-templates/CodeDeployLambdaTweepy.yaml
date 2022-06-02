@@ -13,5 +13,5 @@ Resources:
         ImageUri: !Sub '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ECRRepoName}:latest'
       Role:
         Fn::ImportValue: RoleLambdaImage-TwitterArn
-      Timeout: 301
+      Timeout: 302
       MemorySize: 1024
