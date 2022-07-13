@@ -5,7 +5,7 @@ about a topic for a chosen duration.The updates to required roles and deployment
 In the intended workflow, the user commits to CodeCommit which triggers codepipeline execution via EventBridge. This executes Source Stage (which fetches
 cloud formation templates from S3), Build Stage (builds application code and pushes to ECR), Deploy Stage (which deploys to Lambda container resource) and finally runs end to end test on the deployed code to check it executes/functions as expected.
 
-![](../screenshots/architecture_tweets_deploy_lambda-container.png) 
+![](../../screenshots/architecture_tweets_deploy_lambda-container.png) 
 
 
 ## Running local script
@@ -146,9 +146,9 @@ aws codepipeline list-pipelines
 
 Once the pipeline has been created above, it will automatically execute
 
-![](../screenshots/TweetsLambdaDeploy-pipelineviz-1.png) 
+![](../../screenshots/TweetsLambdaDeploy-pipelineviz-1.png) 
 
-![](../screenshots/TweetsLambdaDeploy-pipelineviz-2.png) 
+![](../../screenshots/TweetsLambdaDeploy-pipelineviz-2.png) 
 
 
 Code Pipeline has been configured to trigger with every push to CodeCommit via EventBridge. This will
@@ -162,14 +162,14 @@ CodePipeline will also trigger automatically if the source artifact zip in S3 is
 For manual triggering, choose Release change on the pipeline details page on the console. This runs the most recent 
 revision available in each source location specified in a source action through the pipeline.
 
-![](../screenshots/codepipeline_executionhistory.png) 
+![](../../screenshots/codepipeline_executionhistory.png) 
 
 Once the pipeline has finished, we can check CloudWatch to see the invocation logs in the corresponding log stream. 
 The `main_twitter.handler` includes  `put_job_success_result` and `put_job_failure_result` codepipeline client methods
 to return the success/failure of the lambda execution to the pipeline, which will terminate the `LambdaInvocationTest` stage 
 with success or failure appropriately.
 
-![](../screenshots/lambda_invocation_logs.png) 
+![](../../screenshots/lambda_invocation_logs.png) 
 
 
 ## Optional: Manual Method of Lambda Image Deployment and Execution via cli
