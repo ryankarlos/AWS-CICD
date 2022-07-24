@@ -5,7 +5,7 @@ CodeBuild and CodeDeploy for versioning, building, testing and deploying applica
 We will configure AWS CodePipeline to build an ECR image and deploy the latest version to lambda container.
 The application code will stream tweets using tweepy library to kinesis stream.
 First we need to setup codepipeline and he various stages before invoking our lambda to stream tweets. Once this is complete, 
-navigate to this [page](examples/deploy-lambda-image) to setup kinesis stream resource and stream tweets to it.
+navigate to this [page](projects/deploy-lambda-image) to setup kinesis stream resource and stream tweets to it.
 
 ### Setting up Code Pipeline 
 

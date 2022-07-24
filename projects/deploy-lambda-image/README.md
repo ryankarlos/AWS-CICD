@@ -3,18 +3,20 @@
 The code pipeline workflow is represented diagramatically for this use case. We will be deploying an application container to lambda which streams tweets 
 about a topic for a chosen duration.The updates to required roles and deployment of Lambda Image resource is automated using CloudFormation templates.
 In the intended workflow, the user commits to CodeCommit which triggers codepipeline execution via EventBridge. This executes Source Stage (which fetches
-cloud formation templates from S3), Build Stage (builds application code and pushes to ECR), Deploy Stage (which deploys to Lambda container resource) and finally runs end to end test on the deployed code to check it executes/functions as expected.
+cloud formation templates from S3), Build Stage (builds application code and pushes to ECR), Deploy Stage (which deploys to Lambda container resource) and 
+finally runs end-to-end test on the deployed code to check it executes as expected.
 
 ![](../../screenshots/architecture_tweets_deploy_lambda-container.png) 
 
 
 ## Running local script
 
-* Need to install click https://click.palletsprojects.com/en/8.1.x/quickstart/ in virtual environment
-The command and argument options can be viewed in cli by running command below 
+* Need to install the package [click](https://click.palletsprojects.com/en/8.1.x/quickstart/) in the virtual environment.
+The command and argument options can be viewed in cli by running the commands below
   
 ```
-$ python local_run.py --help 
+$ cd projects/deploy-lambda-image
+$ python local_run.py --help s
                                              
 Usage: local_run.py [OPTIONS] KEYWORD
 
@@ -153,8 +155,7 @@ Once the pipeline has been created above, it will automatically execute
 
 Code Pipeline has been configured to trigger with every push to CodeCommit via EventBridge. This will
 start the source stage, transition to build phase if successful where the commands in buildspec.yml  will be executed 
-in different phases of build process
-https://docs.aws.amazon.com/codebuild/latest/userguide/getting-started-cli-create-build-spec.html
+in different phases of [build process](https://docs.aws.amazon.com/codebuild/latest/userguide/getting-started-cli-create-build-spec.html)
 Finally it will transition to Deploy and TestInvocation Stages if successful (as in diagram above). 
 
 CodePipeline will also trigger automatically if the source artifact zip in S3 is updated. 
@@ -197,7 +198,7 @@ and fetch value of  "FunctionArn"
 $ aws lambda list-functions 
 ```
 
-Then run following command listed in https://docs.aws.amazon.com/cli/latest/reference/lambda/invoke.html
+Then run following command listed in [AWS docs](https://docs.aws.amazon.com/cli/latest/reference/lambda/invoke.html)
 This includes payload, arn which was just accessed and json output file to store the response. 
 
 ```Shell
