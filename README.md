@@ -258,16 +258,16 @@ the number of resources that will exist when the stack is created.
 
 ## References
 
-1  https://docs.aws.amazon.com/codepipeline/latest/userguide/concepts-devops-example.html
-2 https://docs.aws.amazon.com/codepipeline/latest/userguide/concepts.html
-3 https://docs.aws.amazon.com/codepipeline/latest/userguide/approvals-action-add.html.
-4  https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-pull-ecr-image.html
-5  https://docs.aws.amazon.com/AmazonECR/latest/userguide/registry_auth.html
-6  https://docs.aws.amazon.com/codebuild/latest/userguide/getting-started-create-build-project-console.html
-7  https://docs.aws.amazon.com/codebuild/latest/userguide/getting-started-run-build-console.html
-8  https://docs.aws.amazon.com/codebuild/latest/userguide/sample-docker.html
-9. https://docs.aws.amazon.com/codebuild/latest/userguide/getting-started-cli-create-build-spec.html
-10. https://docs.aws.amazon.com/codecommit/latest/userguide/how-to-create-repository.html
-11. https://docs.aws.amazon.com/codedeploy/latest/userguide/applications-create.html
-12. https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-groups-create.html
-13. https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-validate-template.html
+* 1.  https://docs.aws.amazon.com/codepipeline/latest/userguide/concepts-devops-example.html
+* 2. https://docs.aws.amazon.com/codepipeline/latest/userguide/concepts.html
+* 3. https://docs.aws.amazon.com/codepipeline/latest/userguide/approvals-action-add.html.
+* 4.  https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-pull-ecr-image.html
+* 5.  https://docs.aws.amazon.com/AmazonECR/latest/userguide/registry_auth.html
+* 6.  https://docs.aws.amazon.com/codebuild/latest/userguide/getting-started-create-build-project-console.html
+* 7.  https://docs.aws.amazon.com/codebuild/latest/userguide/getting-started-run-build-console.html
+* 8.  https://docs.aws.amazon.com/codebuild/latest/userguide/sample-docker.html
+* 9. https://docs.aws.amazon.com/codebuild/latest/userguide/getting-started-cli-create-build-spec.html
+* 10. https://docs.aws.amazon.com/codecommit/latest/userguide/how-to-create-repository.html
+* 11. https://docs.aws.amazon.com/codedeploy/latest/userguide/applications-create.html
+* 12. https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-groups-create.html
+* 13. https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-validate-template.html
