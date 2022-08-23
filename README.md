@@ -1,13 +1,8 @@
 ## AWS CodePipeline 
 
-![](../../screenshots/architecture_tweets_deploy_lambda-container.png) 
-
-Here we will demonstrate an examples of setting up CI-CD pipelines using AWS code pipeline for software delivery automation. Using CodeCommit, 
-CodeBuild and CodeDeploy for versioning, building, testing and deploying applications in the cloud.
-We will configure AWS CodePipeline to build an ECR image and deploy the latest version to lambda container.
-The application code will stream tweets using python tweepy library. First we need to setup code pipeline and the various stages to deploy application code to lambda image 
+In this example, we will  configure AWS CodePipeline to build an ECR image and deploy the latest version 
+to lambda container. The application code will stream tweets using python tweepy library. First we need to setup code pipeline and the various stages to deploy application code to lambda image 
 which will stream tweets when invoked.
-
 Typically, a codepipeline job contains the following stages but could be fewer or more depending on the application for e.g. could have more envs for testing before deplopyoing to 
 prod. [1][2].
 
@@ -426,9 +421,9 @@ Code Pipeline has been configured to trigger with every push to CodeCommit via E
 start the source stage, transition to build phase if successful where the commands in buildspec.yml  
 will be executed  in different phases of build process [9].
 
-![](../../screenshots/TweetsLambdaDeploy-pipelineviz-1.png) 
+![](screenshots/TweetsLambdaDeploy-pipelineviz-1.png) 
 
-![](../../screenshots/TweetsLambdaDeploy-pipelineviz-2.png) 
+![](screenshots/TweetsLambdaDeploy-pipelineviz-2.png) 
 
 Finally, it will transition to Deploy and TestInvocation Stages if successful (as in diagram above). 
 CodePipeline will also trigger automatically if the source artifact zip in S3 is updated. 
@@ -436,14 +431,14 @@ CodePipeline will also trigger automatically if the source artifact zip in S3 is
 For manual triggering, choose Release change on the pipeline details page on the console. This runs the most recent 
 revision available in each source location specified in a source action through the pipeline.
 
-![](../../screenshots/codepipeline_executionhistory.png) 
+![](screenshots/codepipeline_executionhistory.png) 
 
 Once the pipeline has finished, we can check CloudWatch to see the invocation logs in the corresponding log stream. 
 The `main_twitter.handler` includes  `put_job_success_result` and `put_job_failure_result` codepipeline client methods
 to return the success/failure of the lambda execution to the pipeline, which will terminate the `LambdaInvocationTest` stage 
 with success or failure appropriately.
 
-![](../../screenshots/lambda_invocation_logs.png) 
+![](screenshots/lambda_invocation_logs.png) 
 
 
 #### Optional: Checking docker image contents from ECR
