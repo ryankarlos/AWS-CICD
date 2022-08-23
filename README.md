@@ -40,7 +40,7 @@ This deploys the application to a production environment. Could configure the pi
 requires manual approval to execute [3]
 
   
-## Creating the source repo, roles, artifacts and code pipeline
+### Creating the source repo, roles, artifacts and code pipeline
 
 The [cf templates folder](https://github.com/ryankarlos/AWS-CICD/tree/master/cf-templates) contains the roles resources and 
 deployment resource configs. We will need to create these stacks with cloudformation before they are used within the pipeline for stack updates [1]
@@ -75,7 +75,7 @@ $ aws s3 cp template-source-artifacts.zip s3://codepipeline-us-east-1-4934535011
 ```
 
 Now we can create the codepipeline (with the source, build and deploy stages) from the [definition json file](https://github.com/ryankarlos/AWS-CICD/blob/master/cp-definitions/deploy-lambda-image.json) using 
-the command below [2]. The definition json assumes code pipeline role is created before.
+the command below [2]. The definition json assumes code pipeline role is created as described above.
 
 It is worth having a look at the configuration file to understand the settings before we create the pipeline.
 
@@ -193,8 +193,8 @@ on whether we need to create, update or delete the stack.
 The template filename path with reference to the input artifact (the template filepath is generated 
 automatically depending on the filename set). 
 
-The first three actions create the roles for CloudFormation, CodePipeline and Lambda. The `runOrder` property is set to  value of 1
-for these actions so that they run in parallel.
+The first three actions will update the roles for CloudFormation, CodePipeline and Lambda, if the cloudformatiom templates 
+have changed. The `runOrder` property is set to  value of 1 for these actions so that they run in parallel.
 The next action deletes any existing lambda image which may exist. The runOrder value is incremented to 2 so that it runs 
 after the roles are created.
 
@@ -326,7 +326,7 @@ The code commit respository that we have just created in code pipeline is empty 
 [application code](https://github.com/ryankarlos/AWS-CICD/tree/master/projects/deploy-lambda-image) into the repository
 before running codepipeline end to end. 
 
-## Set up a local repository
+### Set up a local repository
 
 In this step, you set up a local repository to connect to your remote CodeCommit repository.
 This assumes using ssh keys installed on your machine. If not setup ssh keys already using `ssh-keygen` as in
@@ -384,7 +384,7 @@ git push
 The files you downloaded and added to your local repo have now been added to the main branch in your 
 CodeCommit MyDemoRepo repository and are ready to be included in a pipeline.
 
-### Optional: Pushing to both Github and CodeCommit 
+#### Optional: Pushing to both Github and CodeCommit 
 
 Assuming you also have the repository in github and you may also want to configure git to push 
 to both code commit and github repos when running `git push origin master`,as 
@@ -423,10 +423,35 @@ trying to push to remote
 $ ssh-add --apple-use-keychain ~/.ssh/codecommit_rsa
 ```
 
+### Triggering code pipeline 
+
+Code Pipeline has been configured to trigger with every push to CodeCommit via EventBridge. This will
+start the source stage, transition to build phase if successful where the commands in buildspec.yml  
+will be executed  in different phases of build process [9].
+
+![](../../screenshots/TweetsLambdaDeploy-pipelineviz-1.png) 
+
+![](../../screenshots/TweetsLambdaDeploy-pipelineviz-2.png) 
+
+Finally, it will transition to Deploy and TestInvocation Stages if successful (as in diagram above). 
+CodePipeline will also trigger automatically if the source artifact zip in S3 is updated. 
+
+For manual triggering, choose Release change on the pipeline details page on the console. This runs the most recent 
+revision available in each source location specified in a source action through the pipeline.
+
+![](../../screenshots/codepipeline_executionhistory.png) 
+
+Once the pipeline has finished, we can check CloudWatch to see the invocation logs in the corresponding log stream. 
+The `main_twitter.handler` includes  `put_job_success_result` and `put_job_failure_result` codepipeline client methods
+to return the success/failure of the lambda execution to the pipeline, which will terminate the `LambdaInvocationTest` stage 
+with success or failure appropriately.
+
+![](../../screenshots/lambda_invocation_logs.png) 
+
+
 #### Optional: Checking docker image contents from ECR
 
-For images built from CodeBuild and pushed to ECR, if you want to check contents or run docker image locally from 
-
+For images built from CodeBuild and pushed to ECR, if you want to check contents or run docker image locally from
 Amazon ECR, you can pull it to your local environment with the docker pull command. [4]
 
 First you would need to authenticate your Docker client to the Amazon ECR registry that you intend to pull your image from. 
@@ -504,33 +529,8 @@ def handler(event, context):
         raise
 ```
 
-## Triggering code pipeline 
 
-Code Pipeline has been configured to trigger with every push to CodeCommit via EventBridge. This will
-start the source stage, transition to build phase if successful where the commands in buildspec.yml  
-will be executed  in different phases of build process [9].
-
-![](../../screenshots/TweetsLambdaDeploy-pipelineviz-1.png) 
-
-![](../../screenshots/TweetsLambdaDeploy-pipelineviz-2.png) 
-
-Finally, it will transition to Deploy and TestInvocation Stages if successful (as in diagram above). 
-CodePipeline will also trigger automatically if the source artifact zip in S3 is updated. 
-
-For manual triggering, choose Release change on the pipeline details page on the console. This runs the most recent 
-revision available in each source location specified in a source action through the pipeline.
-
-![](../../screenshots/codepipeline_executionhistory.png) 
-
-Once the pipeline has finished, we can check CloudWatch to see the invocation logs in the corresponding log stream. 
-The `main_twitter.handler` includes  `put_job_success_result` and `put_job_failure_result` codepipeline client methods
-to return the success/failure of the lambda execution to the pipeline, which will terminate the `LambdaInvocationTest` stage 
-with success or failure appropriately.
-
-![](../../screenshots/lambda_invocation_logs.png) 
-
-
-## Optional: Manual Method of Lambda Image Deployment and Execution via cli
+### Optional: Manual Method of Lambda Image Deployment and Execution via cli
 
 CodePipeline already automates these steps. However, for more control over creating and invoking the function, 
 we can do this manually via the cli (assuming ECR URI has the build we need)
@@ -616,7 +616,7 @@ $ aws lambda update-function-code --function-name LambdaTwitter --image-uri <ima
 
 ```
 
-## References
+### References
 
 * [1] https://docs.aws.amazon.com/codepipeline/latest/userguide/concepts-devops-example.html
 * [2] https://docs.aws.amazon.com/codepipeline/latest/userguide/concepts.html
