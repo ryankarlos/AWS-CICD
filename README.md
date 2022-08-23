@@ -48,11 +48,8 @@ deployment resource configs. We will need to create these stacks with cloudforma
 ```shell
 
 $ aws cloudformation create-stack --stack-name CodeDeployLambdaTweets --template-body file://cf-templates/CodeDeployLambdaTweepy.yaml
-
 $ aws cloudformation create-stack --stack-name RoleCloudFormationforCodeDeploy --template-body file://cf-templates/roles/CloudFormationRole.yaml
-
 $ aws cloudformation create-stack --stack-name RoleCodePipeline --template-body file://cf-templates/roles/CodepipelineRole.yaml
-
 $ aws cloudformation create-stack --stack-name RoleLambdaImage --template-body file://cf-templates/roles/RoleLambdaImageStaging.yaml
 ```
 
